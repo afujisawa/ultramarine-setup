@@ -233,7 +233,7 @@ instalar_via_git "Tmux Plugin Manager (TPM)" \
 instalar_via_git "Tokyonight-GTK-Theme" \
 	"https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git" \
 	"$HOME_REAL/Downloads/Tokyonight-GTK-Theme"\
-	"themes/./install.sh --tweaks storm outline macos -t red -l"
+	"themes/./install.sh --tweaks storm macos -t red -l"
 
 executar "Alterar tema do mouse" \
 	"gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'"
@@ -243,5 +243,8 @@ executar "Alterar tema de icones" \
 
 executar "Alterar tema das aplicações legadas" \
 "gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
+
+executar "Alterar papel de parede" \
+"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
 
 exibir_resumo
