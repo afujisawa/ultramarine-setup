@@ -185,9 +185,9 @@ executar(){
 	local nome=$1
 	local comando=$2
 
-    if [ ! -S "/run/user/$USER_UID/bus" ]; then
-        DBUS_ADDRESS=$(pgrep -u "$USER_UID" -a gnome-session | grep -o 'DBUS_SESSION_BUS_ADDRESS=[^ ]*' | cut -d= -f2-)
-    fi
+	if [ ! -S "/run/user/$USER_UID/bus" ]; then
+	DBUS_ADDRESS=$(pgrep -u "$USER_UID" -a gnome-session | grep -o 'DBUS_SESSION_BUS_ADDRESS=[^ ]*' | cut -d= -f2-)
+	fi
 
 	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" bash -c "$comando"; then
 		mensagem "SUCESSO" "$nome concluído"
@@ -239,15 +239,15 @@ executar "Alterar tema do mouse" \
 	"gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'"
 
 executar "Alterar tema de icones" \
-"gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
+	"gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
 
 executar "Alterar tema das aplicações legadas" \
-"gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
+	"gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
 
 executar "Alterar papel de parede" \
-"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
+	"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
 
 executar "Ativa extensão Pop-Shell" \
-"gnome-extensions enable pop-shell@system76.com"
+	"gnome-extensions enable pop-shell@system76.com"
 
 exibir_resumo
