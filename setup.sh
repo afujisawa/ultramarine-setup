@@ -28,4 +28,16 @@ mensagem() {
 	printf "%s[%s]%s %s\n" "$COR" "$1" "$RESETAR" "$2."
 }
 
+verifica_permissao() {
+	if [ "$EUID" -eq 0 ]; then
+		mensagem "SUCESSO" "Permissão root confirmada"
+	else
+		mensagem "ERRO" "Execute com o comando sudo"
+		exit 1
+	fi
+}
 
+
+# Execução
+clear
+verifica_permissao
