@@ -66,7 +66,6 @@ verifica_distro() {
 	fi
 }
 
-
 verifica_internet() {
 	if ping -c 1 8.8.8.8 &>/dev/null; then
 		mensagem "SUCESSO" "Conexão com a internet ativa"
@@ -152,7 +151,6 @@ instalar_lote() {
 		instalar_pacote "flatpak" "$app"
 	done
 }
-
 
 instalar_via_git() {
 	local nome="$1"
@@ -245,8 +243,5 @@ executar "Alterar tema de icones" \
 
 executar "Alterar tema das aplicações legadas" \
 "gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
-
-
-
 
 exibir_resumo
