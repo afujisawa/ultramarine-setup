@@ -84,6 +84,7 @@ remover_programas() {
 		mensagem "SUCESSO" "Limpeza de dependências concluída"
 	else
 		mensagem "ERRO" "Falha ao executar o autoremove"
+		exit 1
 	fi
 }
 
