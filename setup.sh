@@ -6,9 +6,11 @@ OS_RELEASE=/etc/os-release
 
 USUARIO_REAL="${SUDO_USER:-$USER}"
 HOME_REAL="$(getent passwd "$USUARIO_REAL" | cut -d: -f6)"
+USER_UID=$(id -u "$USUARIO_REAL")
+DBUS_ADDRESS="unix:path=/run/user/$USER_UID/bus"
 
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
-PACOTES_DNF="ShellCheck shfmt zed vlc"
+PACOTES_DNF="ShellCheck shfmt zed vlc gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
 PACOTES_FLATPAK=("")
 
 TOTAL_SUCESSO=0
@@ -156,21 +158,46 @@ instalar_via_git() {
 	local nome="$1"
 	local url="$2"
 	local destino="$3"
+	local instalar="${4:-}"
 
 	if [ -d "$destino" ]; then
 		mensagem "ALERTA" "$nome já está instalado para o usuário $USUARIO_REAL"
 		return 0
 	fi
 
-	mensagem "INFO" "Clonando e instalando $nome"
+	mensagem "INFO" "Clonando $nome"
 	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" git clone "$url" "$destino" &>/dev/null; then
-		mensagem "SUCESSO" "$nome instalado com sucesso"
+		mensagem "SUCESSO" "Repositório $nome clonado"
+		if [[ -n "$instalar" ]]; then
+			mensagem "INFO" "Instalando $nome"
+			if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" bash -c "$destino/$instalar &>/dev/null"; then
+				mensagem "SUCESSO" "$nome instalado"
+			else
+				mensagem "ERRO" "Falha ao instalar $nome"
+				return 1
+			fi
+		fi
 	else
 		mensagem "ERRO" "Falha ao clonar ou instalar o $nome"
 		return 1
 	fi
 }
 
+executar(){
+	local nome=$1
+	local comando=$2
+
+    if [ ! -S "/run/user/$USER_UID/bus" ]; then
+        DBUS_ADDRESS=$(pgrep -u "$USER_UID" -a gnome-session | grep -o 'DBUS_SESSION_BUS_ADDRESS=[^ ]*' | cut -d= -f2-)
+    fi
+
+	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" bash -c "$comando"; then
+		mensagem "SUCESSO" "$nome concluído"
+	else
+		mensagem "ERRO" "Comando $comando falhou"
+		return 1
+	fi
+}
 
 exibir_resumo() {
 	local status_final=0
@@ -204,5 +231,22 @@ instalar_lote
 instalar_via_git "Tmux Plugin Manager (TPM)" \
 	"https://github.com/tmux-plugins/tpm" \
 	"$HOME_REAL/.tmux/plugins/tpm"
+
+instalar_via_git "Tokyonight-GTK-Theme" \
+	"https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git" \
+	"$HOME_REAL/Downloads/Tokyonight-GTK-Theme"\
+	"themes/./install.sh --tweaks storm outline macos -t red -l"
+
+executar "Alterar tema do mouse" \
+	"gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'"
+
+executar "Alterar tema de icones" \
+"gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
+
+executar "Alterar tema das aplicações legadas" \
+"gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
+
+
+
 
 exibir_resumo
