@@ -10,7 +10,7 @@ USER_UID=$(id -u "$USUARIO_REAL")
 DBUS_ADDRESS="unix:path=/run/user/$USER_UID/bus"
 
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
-PACOTES_DNF="ShellCheck shfmt zed vlc gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
+PACOTES_DNF="ShellCheck shfmt zed vlc jetbrainsmono-nerd-fonts gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
 PACOTES_FLATPAK=("")
 
 TOTAL_SUCESSO=0
@@ -181,15 +181,15 @@ instalar_via_git() {
 	fi
 }
 
-executar(){
+executar() {
 	local nome=$1
 	local comando=$2
 
 	if [ ! -S "/run/user/$USER_UID/bus" ]; then
-	DBUS_ADDRESS=$(pgrep -u "$USER_UID" -a gnome-session | grep -o 'DBUS_SESSION_BUS_ADDRESS=[^ ]*' | cut -d= -f2-)
+		DBUS_ADDRESS=$(pgrep -u "$USER_UID" -a gnome-session | grep -o 'DBUS_SESSION_BUS_ADDRESS=[^ ]*' | cut -d= -f2-)
 	fi
 
-	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" bash -c "$comando"; then
+	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDRESS" bash -c "$comando &>/dev/null"; then
 		mensagem "SUCESSO" "$nome concluído"
 	else
 		mensagem "ERRO" "Comando $comando falhou"
@@ -232,8 +232,11 @@ instalar_via_git "Tmux Plugin Manager (TPM)" \
 
 instalar_via_git "Tokyonight-GTK-Theme" \
 	"https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git" \
-	"$HOME_REAL/Downloads/Tokyonight-GTK-Theme"\
+	"$HOME_REAL/Downloads/Tokyonight-GTK-Theme" \
 	"themes/./install.sh --tweaks storm macos -t red -l"
+
+executar "Reiníciar cache de fonts" \
+	"fc-cache -f -v"
 
 executar "Alterar tema do mouse" \
 	"gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'"
