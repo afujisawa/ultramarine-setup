@@ -4,6 +4,8 @@ set -euo pipefail
 # Parâmetros
 OS_RELEASE=/etc/os-release
 
+PACOTES_REMOVER=(gnome-maps "libreoffice-*")
+
 TOTAL_SUCESSO=0
 TOTAL_ERRO=0
 
@@ -67,8 +69,37 @@ verifica_internet() {
 	fi
 }
 
+remover_programas() {
+	mensagem "INFO" "Removendo programas não utilizados"
+	if dnf remove -y "$PACOTES_REMOVER" &>/dev/null; then
+		mensagem "SUCESSO" "Aplicativos removidos com sucesso"
+	else
+		mensagem "ERRO" "Falha ao remover os pacotes"
+		exit 1
+	fi
+
+	if dnf autoremove -y &>/dev/null; then
+		mensagem "SUCESSO" "Limpeza de dependências concluída"
+	else
+		mensagem "ERRO" "Falha ao executar o autoremove"
+	fi
+}
+
+atualizar_sistema() {
+	mensagem "INFO" "Atualizando pacotes do sistema"
+	if dnf upgrade -y --refresh &>/dev/null; then
+		mensagem "SUCESSO" "Sistema atualizado com sucesso"
+	else
+		mensagem "ERRO" "Falha ao atualizar o sistema"
+		exit 1
+	fi
+}
+
 # Execução
 clear
 verifica_permissao
 verifica_distro
 verifica_internet
+remover_programas
+atualizar_sistema
+
