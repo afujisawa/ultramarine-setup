@@ -4,6 +4,9 @@ set -euo pipefail
 # Parâmetros
 OS_RELEASE=/etc/os-release
 
+USUARIO_REAL="${SUDO_USER:-$USER}"
+HOME_REAL="$(getent passwd "$USUARIO_REAL" | cut -d: -f6)"
+
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
 PACOTES_DNF="ShellCheck shfmt zed vlc"
 PACOTES_FLATPAK=("")
@@ -149,6 +152,25 @@ instalar_lote() {
 }
 
 
+instalar_via_git() {
+	local nome="$1"
+	local url="$2"
+	local destino="$3"
+
+	if [ -d "$destino" ]; then
+		mensagem "ALERTA" "$nome já está instalado para o usuário $USUARIO_REAL"
+		return 0
+	fi
+
+	mensagem "INFO" "Clonando e instalando $nome"
+	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" git clone "$url" "$destino" &>/dev/null; then
+		mensagem "SUCESSO" "$nome instalado com sucesso"
+	else
+		mensagem "ERRO" "Falha ao clonar ou instalar o $nome"
+		return 1
+	fi
+}
+
 # Execução
 clear
 verifica_permissao
@@ -157,3 +179,7 @@ verifica_internet
 remover_programas
 atualizar_sistema
 instalar_lote
+
+instalar_via_git "Tmux Plugin Manager (TPM)" \
+	"https://github.com/tmux-plugins/tpm" \
+	"$HOME_REAL/.tmux/plugins/tpm"
