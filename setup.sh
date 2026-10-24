@@ -2,6 +2,8 @@
 set -euo pipefail
 
 # Parâmetros
+OS_RELEASE=/etc/os-release
+
 TOTAL_SUCESSO=0
 TOTAL_ERRO=0
 
@@ -37,7 +39,26 @@ verifica_permissao() {
 	fi
 }
 
+verifica_distro() {
+	if [[ -f "$OS_RELEASE" ]]; then
+		# shellcheck disable=SC1090
+		source "$OS_RELEASE"
+
+		if [[ "$ID" == "ultramarine" ]]; then
+			mensagem "SUCESSO" "Distribuição Ultramarine detectada"
+		else
+			mensagem "ERRO" "Script exclusivo para distribuição Ultramarine"
+			exit 1
+		fi
+	else
+		mensagem "ERRO" "Não foi possível identificar a distribuição"
+		mensagem "INFO" "Arquivo $OS_RELEASE não encontrado"
+		exit 1
+	fi
+}
+
 
 # Execução
 clear
 verifica_permissao
+verifica_distro
