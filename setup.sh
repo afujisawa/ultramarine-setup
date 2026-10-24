@@ -247,4 +247,7 @@ executar "Alterar tema das aplicações legadas" \
 executar "Alterar papel de parede" \
 "gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
 
+executar "Ativa extensão Pop-Shell" \
+"gnome-extensions enable pop-shell@system76.com"
+
 exibir_resumo
