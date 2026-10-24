@@ -171,6 +171,27 @@ instalar_via_git() {
 	fi
 }
 
+
+exibir_resumo() {
+	local status_final=0
+
+	echo ""
+	echo "=========================================="
+	echo "		  RESUMO DA EXECUÇÃO			  "
+	echo "=========================================="
+	mensagem "SUCESSO" "Ações bem-sucedidas: $TOTAL_SUCESSO"
+	if [ "$TOTAL_ERRO" -gt 0 ]; then
+		mensagem "ERRO" "Erros encontrados: $TOTAL_ERRO"
+		status_final=1
+	else
+		mensagem "SUCESSO" "Erros encontrados: $TOTAL_ERRO"
+		status_final=0
+	fi
+
+	echo "=========================================="
+	return "$status_final"
+}
+
 # Execução
 clear
 verifica_permissao
@@ -183,3 +204,5 @@ instalar_lote
 instalar_via_git "Tmux Plugin Manager (TPM)" \
 	"https://github.com/tmux-plugins/tpm" \
 	"$HOME_REAL/.tmux/plugins/tpm"
+
+exibir_resumo
