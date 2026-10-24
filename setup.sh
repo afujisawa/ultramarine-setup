@@ -202,7 +202,7 @@ exibir_resumo() {
 
 	echo ""
 	echo "=========================================="
-	echo "		  RESUMO DA EXECUÇÃO			  "
+	echo "            RESUMO DA EXECUÇÃO            "
 	echo "=========================================="
 	mensagem "SUCESSO" "Ações bem-sucedidas: $TOTAL_SUCESSO"
 	if [ "$TOTAL_ERRO" -gt 0 ]; then
