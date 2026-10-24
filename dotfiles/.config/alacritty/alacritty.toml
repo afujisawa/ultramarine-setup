@@ -7,7 +7,7 @@ import = [
 [window]
 dimensions = { columns = 120, lines = 35 }
 padding = { x = 15, y = 15 }
-opacity = 0.90
+opacity = 1.00
 
 [font]
 normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
