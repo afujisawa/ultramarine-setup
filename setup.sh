@@ -11,7 +11,7 @@ DBUS_ADDRESS="unix:path=/run/user/$USER_UID/bus"
 
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
 PACOTES_DNF="ShellCheck shfmt zed vlc jetbrainsmono-nerd-fonts gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
-PACOTES_FLATPAK=("")
+PACOTES_FLATPAK="org.onlyoffice.desktopeditors"
 
 TOTAL_SUCESSO=0
 TOTAL_ERRO=0
