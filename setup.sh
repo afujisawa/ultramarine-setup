@@ -5,6 +5,8 @@ set -euo pipefail
 OS_RELEASE=/etc/os-release
 
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
+PACOTES_DNF="ShellCheck shfmt zed vlc"
+PACOTES_FLATPAK=("")
 
 TOTAL_SUCESSO=0
 TOTAL_ERRO=0
@@ -95,6 +97,57 @@ atualizar_sistema() {
 	fi
 }
 
+instalar_pacote() {
+	local gerenciador=$1
+	local pacote=$2
+
+	case $gerenciador in
+		"dnf")
+			if rpm -q "$pacote" &>/dev/null; then
+				mensagem "ALERTA" "Pacote DNF '$pacote' já está instalado"
+			else
+				mensagem "INFO" "Instalando pacote DNF: $pacote"
+				if dnf install -y "$pacote" &>/dev/null; then
+					mensagem "SUCESSO" "Pacote '$pacote' instalado com sucesso"
+				else
+					mensagem "ERRO" "Falha ao instalar o pacote DNF '$pacote'"
+					return 1
+				fi
+			fi
+			;;
+		"flatpak")
+			if flatpak list --app --columns=application | grep -q "^$pacote$"; then
+				mensagem "ALERTA" "Aplicativo Flatpak '$pacote' já está instalado"
+			else
+				mensagem "INFO" "Instalando Flatpak: $pacote"
+				if flatpak install -y flathub "$pacote" &>/dev/null; then
+					mensagem "SUCESSO" "Flatpak '$pacote' instalado com sucesso"
+				else
+					mensagem "ERRO" "Falha ao instalar o Flatpak '$pacote'"
+					return 1
+				fi
+			fi
+			;;
+		*)
+			mensagem "ERRO" "Gerenciador de pacotes desconhecido: $gerenciador"
+			return 1
+			;;
+	esac
+}
+
+instalar_lote() {
+	mensagem "INFO" "Iniciando instalação de pacotes (DNF)"
+	for pacote in $PACOTES_DNF; do
+		instalar_pacote "dnf" "$pacote"
+	done
+
+	mensagem "INFO" "Iniciando instalação de aplicativos (Flatpak)"
+	for app in $PACOTES_FLATPAK; do
+		instalar_pacote "flatpak" "$app"
+	done
+}
+
+
 # Execução
 clear
 verifica_permissao
@@ -102,4 +155,4 @@ verifica_distro
 verifica_internet
 remover_programas
 atualizar_sistema
-
+instalar_lote
