@@ -28,8 +28,3 @@ key = "V"
 mods = "Control|Shift"
 action = "Paste"
 
-# Limpar terminal
-[[keyboard.bindings]]
-key = "L"
-mods = "Alt"
-chars = "clear\n"
