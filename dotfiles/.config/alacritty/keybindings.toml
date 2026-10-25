@@ -33,32 +33,3 @@ action = "Paste"
 key = "L"
 mods = "Alt"
 chars = "clear\n"
-
-# Modo vim
-[[keyboard.bindings]]
-key = "Space"
-mods = "Control|Shift"
-action = "ToggleViMode"
-
-
-# Subir uma página no histórico
-[[keyboard.bindings]]
-key = "PageUp"
-action = "ScrollPageUp"
-
-# Descer uma página no histórico
-[[keyboard.bindings]]
-key = "PageDown"
-action = "ScrollPageDown"
-
-# Ir para o topo do histórico
-[[keyboard.bindings]]
-key = "Home"
-mods = "Control"
-action = "ScrollToTop"
-
-# Ir para o final do histórico
-[[keyboard.bindings]]
-key = "End"
-mods = "Control"
-action = "ScrollToBottom"
