@@ -206,6 +206,77 @@ instalar_via_curl() {
 	fi
 }
 
+configurar_tema_flatpak() {
+	local tema="$1"
+
+	if [ ! -d "$HOME_REAL/.themes/$tema" ]; then
+		mensagem "ERRO" "Tema $tema não encontrado em $HOME_REAL/.themes"
+		return 1
+	fi
+
+	mensagem "INFO" "Aplicando tema $tema aos aplicativos Flatpak"
+	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" flatpak override --user \
+		--filesystem="$HOME_REAL/.themes:ro" \
+		--filesystem=xdg-config/gtk-3.0:ro \
+		--filesystem=xdg-config/gtk-4.0:ro \
+		--env=GTK_THEME="$tema" &>/dev/null; then
+		mensagem "SUCESSO" "Tema $tema aplicado aos aplicativos Flatpak"
+	else
+		mensagem "ERRO" "Falha ao aplicar o tema $tema aos aplicativos Flatpak"
+		return 1
+	fi
+}
+
+verificar_moldura_obsidian() {
+	jq -e '.frame == "native"' "$1" &>/dev/null
+}
+
+editar_moldura_obsidian() {
+	[ -s "$1" ] || echo "{}" >"$1"
+	jq '.frame = "native"' "$1" >"$1.tmp" && mv "$1.tmp" "$1"
+}
+
+verificar_moldura_onlyoffice() {
+	grep -q "^titlebar=system$" "$1"
+}
+
+editar_moldura_onlyoffice() {
+	if grep -q "^titlebar=" "$1" 2>/dev/null; then
+		sed -i "s/^titlebar=.*/titlebar=system/" "$1"
+	elif grep -q "^\[General\]$" "$1" 2>/dev/null; then
+		sed -i "/^\[General\]$/a titlebar=system" "$1"
+	else
+		printf "[General]\ntitlebar=system\n" >>"$1"
+	fi
+}
+
+configurar_moldura_nativa() {
+	local nome="$1"
+	local processo="$2"
+	local config="$3"
+	local verificar="$4"
+	local editar="$5"
+
+	if [ -f "$config" ] && "$verificar" "$config"; then
+		mensagem "ALERTA" "$nome já está configurado com moldura nativa"
+		return 0
+	fi
+
+	if pgrep -u "$USUARIO_REAL" -f "$processo" &>/dev/null; then
+		mensagem "ERRO" "Feche o $nome antes de configurar a moldura nativa"
+		return 1
+	fi
+
+	mensagem "INFO" "Configurando moldura nativa no $nome"
+	if sudo -u "$USUARIO_REAL" bash -c "$(declare -f "$editar")
+		mkdir -p \"\$(dirname \"\$1\")\" && $editar \"\$1\"" _ "$config" &>/dev/null; then
+		mensagem "SUCESSO" "Moldura nativa configurada no $nome"
+	else
+		mensagem "ERRO" "Falha ao configurar a moldura nativa no $nome"
+		return 1
+	fi
+}
+
 executar() {
 	local nome=$1
 	local comando=$2
@@ -276,6 +347,20 @@ executar "Alterar tema de icones" \
 
 executar "Alterar tema das aplicações legadas" \
 	"gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Red-Dark-Storm'"
+
+configurar_tema_flatpak "Tokyonight-Red-Dark-Storm"
+
+configurar_moldura_nativa "Obsidian" \
+	"md.obsidian.Obsidian" \
+	"$HOME_REAL/.var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json" \
+	verificar_moldura_obsidian \
+	editar_moldura_obsidian
+
+configurar_moldura_nativa "OnlyOffice" \
+	"desktopeditors" \
+	"$HOME_REAL/.var/app/org.onlyoffice.desktopeditors/config/onlyoffice/DesktopEditors.conf" \
+	verificar_moldura_onlyoffice \
+	editar_moldura_onlyoffice
 
 executar "Alterar papel de parede" \
 	"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
