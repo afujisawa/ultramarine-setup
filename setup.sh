@@ -52,11 +52,12 @@ verifica_permissao() {
 }
 
 verifica_distro() {
-	if [[ -f "$OS_RELEASE" ]]; then
-		# shellcheck disable=SC1090
-		source "$OS_RELEASE"
+	local id_distro
 
-		if [[ "$ID" == "ultramarine" ]]; then
+	if [[ -f "$OS_RELEASE" ]]; then
+		id_distro=$(grep -oP '^ID=\K.*' "$OS_RELEASE" | tr -d '"' || true)
+
+		if [[ "$id_distro" == "ultramarine" ]]; then
 			mensagem "SUCESSO" "Distribuição Ultramarine detectada"
 		else
 			mensagem "ERRO" "Script exclusivo para distribuição Ultramarine"
