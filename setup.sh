@@ -80,7 +80,7 @@ verifica_internet() {
 
 remover_programas() {
 	mensagem "INFO" "Removendo programas não utilizados"
-	if dnf remove -y "$PACOTES_REMOVER" &>/dev/null; then
+	if dnf remove -y "${PACOTES_REMOVER[@]}" &>/dev/null; then
 		mensagem "SUCESSO" "Aplicativos removidos com sucesso"
 	else
 		mensagem "ERRO" "Falha ao remover os pacotes"
