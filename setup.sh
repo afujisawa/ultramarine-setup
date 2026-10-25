@@ -10,7 +10,9 @@ USER_UID=$(id -u "$USUARIO_REAL")
 DBUS_ADDRESS="unix:path=/run/user/$USER_UID/bus"
 
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
-PACOTES_DNF="ShellCheck shfmt alacritty oh-my-posh zed vlc jetbrainsmono-nerd-fonts gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
+PACOTES_VISUAL="jetbrainsmono-nerd-fonts gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
+PACOTES_SHELL="ShellCheck shfmt alacritty oh-my-posh"
+PACOTES_DNF="$PACOTES_VISUAL $PACOTES_SHELL zed vlc"
 
 PACOTES_FLATPAK="org.onlyoffice.desktopeditors md.obsidian.Obsidian"
 
@@ -182,6 +184,28 @@ instalar_via_git() {
 	fi
 }
 
+instalar_via_curl() {
+	local nome="$1"
+	local url="$2"
+	local condicao_verificacao="$3"
+	local argumento_extra="${4:-}"
+
+	if [ -n "$condicao_verificacao" ]; then
+		if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" PATH="$HOME_REAL/.local/bin:$PATH" bash -c "$condicao_verificacao" &>/dev/null; then
+			mensagem "ALERTA" "$nome já está instalado para o usuário $USUARIO_REAL"
+			return 0
+		fi
+	fi
+	
+	mensagem "INFO" "Instalando $nome via script (curl)"
+	if sudo -u "$USUARIO_REAL" env HOME="$HOME_REAL" sh -c "$(curl -fsSL "$url")" "" "$argumento_extra" &>/dev/null; then
+		mensagem "SUCESSO" "$nome instalado com sucesso"
+	else
+		mensagem "ERRO" "Falha ao instalar o $nome"
+		return 1
+	fi
+}
+
 executar() {
 	local nome=$1
 	local comando=$2
@@ -235,6 +259,11 @@ instalar_via_git "Tokyonight-GTK-Theme" \
 	"https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git" \
 	"$HOME_REAL/Downloads/Tokyonight-GTK-Theme" \
 	"themes/./install.sh --tweaks storm macos -t red -l"
+
+instalar_via_curl \
+	"Claude Code" \
+	"https://claude.ai/install.sh" \
+    "command -v claude"
 
 executar "Reiníciar cache de fonts" \
 	"fc-cache -f -v"
