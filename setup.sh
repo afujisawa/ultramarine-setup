@@ -12,7 +12,7 @@ DBUS_ADDRESS="unix:path=/run/user/$USER_UID/bus"
 PACOTES_REMOVER=(gnome-maps "libreoffice-*")
 PACOTES_DNF="ShellCheck shfmt alacritty oh-my-posh zed vlc jetbrainsmono-nerd-fonts gtk-murrine-engine sassc bibata-cursor-theme papirus-icon-theme-dark gnome-tweaks"
 
-PACOTES_FLATPAK="org.onlyoffice.desktopeditors"
+PACOTES_FLATPAK="org.onlyoffice.desktopeditors md.obsidian.Obsidian"
 
 TOTAL_SUCESSO=0
 TOTAL_ERRO=0
