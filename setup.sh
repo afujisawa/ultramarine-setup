@@ -278,6 +278,34 @@ configurar_moldura_nativa() {
 	fi
 }
 
+forcar_xwayland() {
+	local nome="$1"
+	local origem="/usr/share/applications/$2"
+	local destino="$HOME_REAL/.local/share/applications/$2"
+
+	if [ -f "$destino" ] && grep -q "^Exec=env -u WAYLAND_DISPLAY " "$destino"; then
+		mensagem "ALERTA" "$nome já está configurado para rodar via XWayland"
+		return 0
+	fi
+
+	if [ ! -f "$origem" ]; then
+		mensagem "ERRO" "Atalho $origem não encontrado"
+		return 1
+	fi
+
+	mensagem "INFO" "Configurando $nome para rodar via XWayland"
+	if sudo -u "$USUARIO_REAL" bash -c '
+		mkdir -p "$(dirname "$2")"
+		cp "$1" "$2"
+		sed -i "s/^Exec=/Exec=env -u WAYLAND_DISPLAY /" "$2"
+	' _ "$origem" "$destino" &>/dev/null; then
+		mensagem "SUCESSO" "$nome configurado para rodar via XWayland"
+	else
+		mensagem "ERRO" "Falha ao configurar $nome para rodar via XWayland"
+		return 1
+	fi
+}
+
 executar() {
 	local nome=$1
 	local comando=$2
@@ -362,6 +390,8 @@ configurar_moldura_nativa "OnlyOffice" \
 	"$HOME_REAL/.var/app/org.onlyoffice.desktopeditors/config/onlyoffice/DesktopEditors.conf" \
 	verificar_moldura_onlyoffice \
 	editar_moldura_onlyoffice
+
+forcar_xwayland "Alacritty" "Alacritty.desktop"
 
 executar "Alterar papel de parede" \
 	"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
