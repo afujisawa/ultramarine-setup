@@ -306,6 +306,27 @@ forcar_xwayland() {
 	fi
 }
 
+configurar_barra_titulo_firefox() {
+	local politicas="/etc/firefox/policies/policies.json"
+	local preferencia='.policies.Preferences["browser.tabs.inTitlebar"]'
+
+	if [ -f "$politicas" ] && jq -e "$preferencia.Value == 0" "$politicas" &>/dev/null; then
+		mensagem "ALERTA" "Firefox já está configurado com barra de título nativa"
+		return 0
+	fi
+
+	mensagem "INFO" "Configurando barra de título nativa no Firefox"
+	if mkdir -p "$(dirname "$politicas")" &&
+		{ [ -s "$politicas" ] || echo "{}" >"$politicas"; } &&
+		jq "$preferencia = {\"Value\": 0, \"Status\": \"default\"}" "$politicas" >"$politicas.tmp" &&
+		mv "$politicas.tmp" "$politicas"; then
+		mensagem "SUCESSO" "Barra de título nativa configurada no Firefox"
+	else
+		mensagem "ERRO" "Falha ao configurar a barra de título nativa no Firefox"
+		return 1
+	fi
+}
+
 executar() {
 	local nome=$1
 	local comando=$2
@@ -392,6 +413,7 @@ configurar_moldura_nativa "OnlyOffice" \
 	editar_moldura_onlyoffice
 
 forcar_xwayland "Alacritty" "Alacritty.desktop"
+configurar_barra_titulo_firefox
 
 executar "Alterar papel de parede" \
 	"gsettings set org.gnome.desktop.background picture-uri-dark $HOME_REAL/Pictures/samurai-warrior-night-by-lake.jpg"
